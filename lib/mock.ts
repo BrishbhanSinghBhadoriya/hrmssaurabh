@@ -36,10 +36,34 @@ export const mockUsers: Partial<User>[] = [
     employeeId: '4',
     name: 'Alice Admin',
     avatarUrl: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=400'
+  },
+  {
+    id: 'mock-hr-saurabh',
+    username: 'hrsaurabh@gmail.com',
+    email: 'hrsaurabh@gmail.com',
+    role: 'hr',
+    employeeId: 'HR001',
+    name: 'Saurabh HR',
+    avatarUrl: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400'
   }
 ];
 
 export const mockEmployees: Partial<Employee>[] = [
+  {
+    id: 'mock-hr-saurabh',
+    empCode: 'HR001',
+    name: 'Saurabh HR',
+    email: 'hrsaurabh@gmail.com',
+    phone: '9876543210',
+    department: 'Human Resources',
+    designation: 'HR Manager',
+    status: 'active',
+    joinedOn: '2024-01-01',
+    avatarUrl: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400',
+    dateOfBirth: '1995-01-01',
+    address: 'Noida, India',
+    salary: 50000
+  },
   {
     id: '1',
     empCode: 'EMP001',

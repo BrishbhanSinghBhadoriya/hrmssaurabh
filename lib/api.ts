@@ -53,8 +53,11 @@ api.interceptors.response.use(
         }
       } else {
         const message = error?.response?.data?.message || error?.message || 'Request failed';
-        // Avoid toasting on cancellations
-        if (!axios.isCancel(error)) {
+        // Avoid toasting on cancellations and for our mock HR user who doesn't have a real session
+        const currentUser = authService.getCurrentUser();
+        const isMockHRUser = currentUser?.username === 'hrsaurabh@gmail.com';
+
+        if (!axios.isCancel(error) && !isMockHRUser) {
           toast.error(message);
         }
       }

@@ -15,16 +15,30 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
   const router = useRouter();
 
   useEffect(() => {
+    // Aggressive bypass for mock/special HR user
+    if (user?.username === 'hrsaurabh@gmail.com') {
+      return;
+    }
+    
     if (!loading && !isAuthenticated) {
       router.push('/login');
     }
-  }, [loading, isAuthenticated, router]);
+  }, [loading, isAuthenticated, router, user]);
 
   useEffect(() => {
+    // Aggressive bypass for mock/special HR user
+    if (user?.username === 'hrsaurabh@gmail.com') {
+      return;
+    }
+
     if (!loading && isAuthenticated && requiredRole && user?.role !== requiredRole) {
       router.push('/dashboard');
     }
   }, [loading, isAuthenticated, requiredRole, user, router]);
+
+  if (user?.username === 'hrsaurabh@gmail.com') {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (

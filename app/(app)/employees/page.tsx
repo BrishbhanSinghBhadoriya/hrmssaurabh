@@ -73,20 +73,36 @@ export default function EmployeesPage() {
     }));
   }, [debouncedSearch]);
   const addEmployeeMutation = useMutation({
-    mutationFn: async (employee: Employee) => {
-      const response = await api.post('/users/register', employee);
-      return response.data;
+    mutationFn: async (employeeData: any) => {
+      // Clean data to ensure no undefined values
+      const payload = {
+        username: employeeData.username || "",
+        password: employeeData.password || "",
+        name: employeeData.name || "",
+        email: employeeData.email || "",
+        phone: employeeData.phone || "",
+        emergencyContactNo: employeeData.emergencyContactNo || "",
+        department: employeeData.department || "",
+        role: employeeData.role || "",
+        designation: employeeData.designation || "",
+        joiningDate: employeeData.joiningDate || "",
+        dob: employeeData.dob || "",
+        isActive: true,
+      };
 
+      console.log('Sending payload to /users/register:', payload);
+      const response = await api.post('/users/register', payload);
+      return response.data;
     },
     onSuccess: () => {
       toast.success('Employee added successfully');
       setShowAddDialog(false);
       refetch();
     },
-    onError: (error) => {
-      const axiosErr = error as AxiosError<{ message?: string }>;
-      console.log(axiosErr);
-      toast.error(axiosErr?.response?.data?.message || 'Failed to add employee');
+    onError: (error: any) => {
+      console.error('💥 Error adding employee:', error);
+      const message = error?.response?.data?.message || error?.message || 'Failed to add employee';
+      toast.error(message);
     },
   });
 

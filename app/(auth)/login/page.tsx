@@ -54,7 +54,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto rounded-full overflow-hidden w-20 h-20 mb-4 shadow-md">
             <img
-              src="/uni.webp"
+              src="/gcrg.jpeg"
               alt="Company Logo"
               className="w-full h-full object-cover"
             />

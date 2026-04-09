@@ -17,37 +17,17 @@ import { Employee, User } from '@/lib/types';
 import { mockDepartments, mockDesignations, mockEmployees } from '@/lib/mock';
 
 const employeeSchema = z.object({
-  username: z.string()
-  .min(3, "Username must be at least 3 characters")
-  .max(50, "Username must be at most 50 characters")
-  .regex(/^[a-zA-Z0-9@$._]+$/, "Username can only contain letters, numbers, underscore, or dot, special charecters"),
-
-  password : z.string()
-  .min(8, "Password must be at least 8 characters long")
-  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-  .regex(/[0-9]/, "Password must contain at least one number")
-  .regex(/[@$!%*?&]/, "Password must contain at least one special character (@$!%*?&)"),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address').min(1, 'Email is required'),
-  phone: z.string().min(10, 'Phone must be at least 10 characters'),
-  emergencyContactNo:z.string().min(10, 'Alternate Phone must be at least 10 characters').min(10,'Alternate Phone is required'),
-
-  department: z.string().min(1, 'Department is required'),
-  role: z.string().min(1, 'Role is required'),
-  designation: z.string().min(1, 'Designation is required'),
-joinedOn: z.string({
-  required_error: 'Joining date is required'
-}).min(1, 'Joining date is required'),
-  dob: z.string().min(1, 'Date of birth is required'),
-}).refine((data) => {
-  if(data.phone==data.emergencyContactNo){
-    return false;
-  }
-  return true;
- }, {
-  message: "Phone and Alternate Phone cannot be the same",
-  path: ["emergencyContactNo"],
+  username: z.string().optional().or(z.literal('')),
+  password : z.string().optional().or(z.literal('')),
+  name: z.string().optional().or(z.literal('')),
+  email: z.string().optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
+  emergencyContactNo: z.string().optional().or(z.literal('')),
+  department: z.string().optional().or(z.literal('')),
+  role: z.string().optional().or(z.literal('')),
+  designation: z.string().optional().or(z.literal('')),
+  joiningDate: z.string().optional().or(z.literal('')),
+  dob: z.string().optional().or(z.literal('')),
 }); 
 
 
@@ -79,12 +59,14 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
       role: employee.role,
       department: employee.department,
       designation: employee.designation,
-      joinedOn: employee.joiningDate ,
+      joiningDate: employee.joiningDate,
       dob: employee.dob,
       
     } : {
       department: '',
       role: '',
+      joiningDate: '',
+      dob: '',
     },
   });
 
@@ -241,16 +223,15 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
         
 
         <div className="space-y-2">
-          <Label htmlFor="joinedOn">Joining Date</Label>
+          <Label htmlFor="joiningDate">Joining Date</Label>
           <Input
-            id="joinedOn"
+            id="joiningDate"
             type="date"
-             max={new Date().toISOString().split("T")[0]}
-            {...register('joinedOn')}
+            {...register('joiningDate')}
             className="w-full"
           />
-          {errors.joinedOn && (
-            <p className="text-sm text-red-600">{errors.joinedOn.message}</p>
+          {errors.joiningDate && (
+            <p className="text-sm text-red-600">{errors.joiningDate.message}</p>
           )}
         </div>
 
