@@ -53,7 +53,8 @@ interface ApiResponse<T> {
     count?: number;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const NEXT_PUBLIC_API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001").replace(/\/+$/, '');
+const API_URL = `${NEXT_PUBLIC_API_URL}/`;
 
 const SalarySlipManager: React.FC = () => {
     const [employees, setEmployees] = useState<Employee[]>([]);

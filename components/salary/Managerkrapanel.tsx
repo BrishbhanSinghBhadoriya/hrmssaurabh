@@ -6,7 +6,8 @@
 import React, { useState, CSSProperties } from "react";
 import { IKRA, ApiResponse } from "@/types/Hrms";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const NEXT_PUBLIC_API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001").replace(/\/+$/, '');
+const API_URL = `${NEXT_PUBLIC_API_URL}/`;
 
 interface Employee { _id: string; name: string; employeeId: string; }
 
@@ -36,7 +37,7 @@ const ManagerKRAPanel: React.FC<Props> = ({ token, employees }) => {
       const payload = { employeeId: empId, date, rating, comment };
       let res;
       try {
-        res = await fetch(`${API_URL}/kra/mark`, {
+        res = await fetch(`${API_URL}kra/mark`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -46,7 +47,7 @@ const ManagerKRAPanel: React.FC<Props> = ({ token, employees }) => {
         });
         if (!res.ok) throw new Error("API call failed");
       } catch (err) {
-        res = await fetch(`${API_URL}/kra/markDailyKRA`, {
+        res = await fetch(`${API_URL}kra/markDailyKRA`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

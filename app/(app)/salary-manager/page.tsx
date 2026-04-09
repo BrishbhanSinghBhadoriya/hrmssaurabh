@@ -9,7 +9,8 @@
  import axios from "axios";
  import api from "@/lib/api";
  
- const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+ const NEXT_PUBLIC_API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001").replace(/\/+$/, '');
+const API_URL = `${NEXT_PUBLIC_API_URL}/`;
  
  export default function SalaryManagerPage() {
    const { user } = useAuth();

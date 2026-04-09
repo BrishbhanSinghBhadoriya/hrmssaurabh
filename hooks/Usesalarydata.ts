@@ -6,7 +6,8 @@ import { SalaryResponse, ApiResponse } from "@/types/Hrms";
 
 
 // NEXT_PUBLIC_API_URL=http://localhost:5001
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const NEXT_PUBLIC_API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001").replace(/\/+$/, '');
+const API_URL = `${NEXT_PUBLIC_API_URL}/`;
 
 interface UseSalaryDataReturn {
   data: SalaryResponse | null;
@@ -33,8 +34,8 @@ export function useSalaryData(
 
     try {
       const endpoint = employeeId && employeeId.trim().length > 0
-        ? `${API_URL}/api/salary/${employeeId}?month=${month}&year=${year}`
-        : `${API_URL}/api/salary/my?month=${month}&year=${year}`;
+        ? `${API_URL}api/salary/${employeeId}?month=${month}&year=${year}`
+        : `${API_URL}api/salary/my?month=${month}&year=${year}`;
 
       const res = await fetch(endpoint, {
         headers: {
@@ -71,7 +72,7 @@ export async function markKRA(
   token: string
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const res = await fetch(`${API_URL}/kra/mark`, {
+    const res = await fetch(`${API_URL}kra/mark`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -98,7 +99,7 @@ export async function markAttendance(
   token: string
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const res = await fetch(`${API_URL}/api/attendance/mark`, {
+    const res = await fetch(`${API_URL}api/attendance/mark`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -3,8 +3,10 @@ import Cookies from 'js-cookie';
 import { authService } from '@/lib/auth';
 import { toast } from 'sonner';
 
+const NEXT_PUBLIC_BACKEND_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001').replace(/\/+$/, '');
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001',
+  baseURL: `${NEXT_PUBLIC_BACKEND_URL}/`,
 });
 
 

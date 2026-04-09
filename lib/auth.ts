@@ -14,7 +14,8 @@ export interface LoginResponse {
   message?: string;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+const NEXT_PUBLIC_BACKEND_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001').replace(/\/+$/, '');
+const BACKEND_URL = `${NEXT_PUBLIC_BACKEND_URL}/`;
 
 export const authService = {
   // Centralized session expiry handling
@@ -185,7 +186,7 @@ export const authService = {
     try {
       const deviceWidth = window.innerWidth || document.documentElement.clientWidth;
       console.log('Device width:', deviceWidth);
-      console.log(' Making API call to:', `${BACKEND_URL}/users/login`);
+      console.log(' Making API call to:', `${BACKEND_URL}users/login`);
       
         const response = await axios.post(`${BACKEND_URL}users/login`, {
         username,
@@ -359,7 +360,7 @@ export const authService = {
         // Normalize to absolute URL if backend returns a relative path
         if (profilePicture && !/^https?:\/\//i.test(profilePicture)) {
           const trimmed = profilePicture.replace(/^\/+/, '');
-          profilePicture = `${BACKEND_URL}/${trimmed}`;
+          profilePicture = `${BACKEND_URL}${trimmed}`;
         }
         
         if (!profilePicture) {
