@@ -58,7 +58,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         <div className="flex items-center gap-3">
           <div className="mx-auto rounded-full overflow-hidden w-20 h-20 mb-4">
           <img 
-               src="/uni.webp" 
+               src="/gcrg.jpeg" 
                alt="Company Logo" 
                className="w-full h-full object-cover" 
                />
