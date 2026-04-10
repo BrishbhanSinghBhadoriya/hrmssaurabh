@@ -273,7 +273,7 @@ const SalarySlipManager: React.FC = () => {
 
     return (
         <div className="salary-slip-manager" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ marginBottom: '30px', color: '#333' }}>Create Salary Slip</h2>
+            <h2 style={{ marginBottom: '30px', color: '#b53030ff' }}>Create Salary Slip</h2>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
                 {/* Left Side - Employee Selection */}
@@ -302,7 +302,7 @@ const SalarySlipManager: React.FC = () => {
 
                     {selectedEmployee && (
                         <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
-                            <h4 style={{ marginBottom: '10px', color: '#555' }}>Employee Details</h4>
+                            <h4 style={{ marginBottom: '10px', color: '#000000ff' }}>Employee Details</h4>
                             <p><strong>Name:</strong> {selectedEmployee.name}</p>
                             <p><strong>Employee ID:</strong> {selectedEmployee.employeeId}</p>
                             <p><strong>Designation:</strong> {selectedEmployee.designation}</p>
@@ -404,7 +404,7 @@ const SalarySlipManager: React.FC = () => {
                                     style={{
                                         width: '100%',
                                         padding: '10px',
-                                        border: '1px solid #ddd',
+                                        border: '1px solid #5b0b0bff',
                                         borderRadius: '4px'
                                     }}
                                 />

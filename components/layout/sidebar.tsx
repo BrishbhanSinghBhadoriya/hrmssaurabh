@@ -29,7 +29,7 @@ const navigation = [
   { name: 'Leaves', href: '/leaves', icon: FileText, roles: ['employee', 'manager', 'hr', 'admin'] },
   { name: 'Salary Slip', href: '/salary-slip', icon: FileText, roles: ['employee'] },
   { name: 'Profile', href: '/profile', icon: User, roles: ['employee', 'manager', 'hr', 'admin'] },
-  { name: 'Admin', href: '/admin', icon: Settings, roles: ['hr', 'admin'] },
+
   { name: 'Salary Manager', href: '/salary-manager', icon: FileText, roles: ['manager', 'hr', 'admin'] },
   {name:'Announcements', href: '/announcements', icon: Bell, roles: ['manager', 'hr', 'admin', 'employee'] },
   {name:"Reset Employee Password",href:'/reset-emp-password',icon: Key , roles:['hr']}

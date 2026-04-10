@@ -62,7 +62,7 @@ const API_URL = `${NEXT_PUBLIC_API_URL}/`;
                  <SalarySlipManager />
                ) : (
                  <div className="text-sm text-muted-foreground">
-                   Aapke role ke liye yeh page allowed nahin hai.
+                   Not all users have access to this feature.
                  </div>
                )}
              </CardContent>
