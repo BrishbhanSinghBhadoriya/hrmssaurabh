@@ -17,10 +17,11 @@ import { Employee, User } from '@/lib/types';
 import { mockDepartments, mockDesignations, mockEmployees } from '@/lib/mock';
 
 const employeeSchema = z.object({
-  username: z.string().optional().or(z.literal('')),
-  password : z.string().optional().or(z.literal('')),
+  employeeId: z.string().min(1, 'Employee ID is required'),
+  username: z.string().min(1, 'Username is required'),
+  password: z.string().min(1, 'Password is required'),
   name: z.string().optional().or(z.literal('')),
-  email: z.string().optional().or(z.literal('')),
+  email: z.string().email('Invalid email address').or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   emergencyContactNo: z.string().optional().or(z.literal('')),
   department: z.string().optional().or(z.literal('')),
@@ -28,6 +29,8 @@ const employeeSchema = z.object({
   designation: z.string().optional().or(z.literal('')),
   joiningDate: z.string().optional().or(z.literal('')),
   dob: z.string().optional().or(z.literal('')),
+  status: z.enum(['active', 'inactive', 'terminated']).default('active'),
+  gender: z.enum(['male', 'female', 'other']).optional(),
 }); 
 
 
@@ -50,6 +53,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
     defaultValues: employee ? {
+      employeeId: employee.employeeId,
       username:employee.username,
       password:employee.password,
       name: employee.name,
@@ -61,12 +65,14 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
       designation: employee.designation,
       joiningDate: employee.joiningDate,
       dob: employee.dob,
-      
+      status: (employee as any).status || 'active',
+      gender: employee.gender,
     } : {
       department: '',
       role: '',
       joiningDate: '',
       dob: '',
+      status: 'active',
     },
   });
 
@@ -76,6 +82,18 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="employeeId">Employee ID</Label>
+          <Input
+            id="employeeId"
+            {...register('employeeId')}
+            placeholder="e.g EMP001"
+            className="w-full"
+          />
+          {errors.employeeId && (
+            <p className="text-sm text-red-600">{errors.employeeId.message}</p>
+          )}
+        </div>
       <div className="space-y-2">
           <Label htmlFor="username">User Name</Label>
           <Input
@@ -89,9 +107,10 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="name">Password</Label>
+          <Label htmlFor="password">Password</Label>
           <Input
             id="password"
+            type="password"
             {...register('password')}
             placeholder="Enter password"
             className="w-full"
@@ -140,6 +159,31 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
           />
           {errors.phone && (
             <p className="text-sm text-red-600">{errors.phone.message}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="gender">Gender</Label>
+          <Controller
+            name="gender"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value || ''}
+                onValueChange={(value) => field.onChange(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.gender && (
+            <p className="text-sm text-red-600">{errors.gender.message}</p>
           )}
         </div>
         <div className="space-y-2">
@@ -235,7 +279,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
           )}
         </div>
 
-        <div className="space-y-2 md:col-span-1">
+        <div className="space-y-2">
           <Label htmlFor="dob">Date of Birth</Label>
           <Input
             id="dob"
@@ -248,6 +292,32 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
             <p className="text-sm text-red-600">{errors.dob.message}</p>
           )}
           
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value || 'active'}
+                onValueChange={(value) => field.onChange(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="terminated">Terminated</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.status && (
+            <p className="text-sm text-red-600">{errors.status.message}</p>
+          )}
         </div>
       </div>
 

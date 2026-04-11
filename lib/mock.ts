@@ -174,7 +174,7 @@ export const mockDepartments: Department[] = [
   { id: '1', name: 'IT', code: 'IT', managerId: '2', employeeCount: 15 },
   { id: '2', name: 'HR', code: 'HR', managerId: '3', employeeCount: 3 },
   { id: '3', name: 'Marketing', code: 'MKT', managerId: '3', employeeCount: 5 },
-  { id: '4', name: 'Finance', code: 'FIN', employeeCount: 4 },
+
   { id: '5', name: 'Sales', code: 'SALES', employeeCount: 4 },
   { id: '6', name: 'Other', code: 'OTHER', managerId: '4', employeeCount: 2 }
 ];
@@ -278,19 +278,28 @@ export const mockLeaveBalances: LeaveBalance[] = [
     employeeId: '1',
     casual: { total: 12, used: 2, remaining: 10 },
     sick: { total: 7, used: 0, remaining: 7 },
-    earned: { total: 18, used: 5, remaining: 13 }
+    earned: { total: 18, used: 5, remaining: 13 },
+    short_leave: { total: 4, used: 1, remaining: 3 },
+    lop: { total: 0, used: 0, remaining: 0 },
+    fop: { total: 0, used: 0, remaining: 0 }
   },
   {
     employeeId: '2',
     casual: { total: 15, used: 3, remaining: 12 },
     sick: { total: 10, used: 1, remaining: 9 },
-    earned: { total: 21, used: 8, remaining: 13 }
+    earned: { total: 21, used: 8, remaining: 13 },
+    short_leave: { total: 4, used: 0, remaining: 4 },
+    lop: { total: 0, used: 0, remaining: 0 },
+    fop: { total: 12, used: 2, remaining: 10 }
   },
   {
     employeeId: '5',
     casual: { total: 12, used: 1, remaining: 11 },
     sick: { total: 7, used: 3, remaining: 4 },
-    earned: { total: 15, used: 2, remaining: 13 }
+    earned: { total: 15, used: 2, remaining: 13 },
+    short_leave: { total: 4, used: 2, remaining: 2 },
+    lop: { total: 0, used: 0, remaining: 0 },
+    fop: { total: 0, used: 0, remaining: 0 }
   }
 ];
 

@@ -18,10 +18,11 @@ import {
 import dayjs from 'dayjs';
 
 const leaveSchema = z.object({
-  type: z.enum(['casual', 'sick', 'earned', 'fop', 'lop']),
+  type: z.enum(['casual', 'sick', 'earned', 'fop', 'lop', 'short_leave']),
   startDate: z.string().min(1, 'Start date is required'),
   endDate: z.string().min(1, 'End date is required'),
   reason: z.string().min(10, 'Reason must be at least 10 characters'),
+  remarks: z.string().optional(),
 }).refine((data) => {
   return dayjs(data.endDate).isAfter(dayjs(data.startDate)) || dayjs(data.endDate).isSame(dayjs(data.startDate));
 }, {
@@ -83,8 +84,7 @@ export function LeaveForm({ onSubmit, onCancel }: LeaveFormProps) {
               <SelectItem value="earned">Earned Leave</SelectItem>
               <SelectItem value="fop">FOP</SelectItem>
               <SelectItem value="lop">LOP</SelectItem>
-
-
+              <SelectItem value="short_leave">Short Leave</SelectItem>
             </SelectContent>
           </Select>
           {errors.type && (
@@ -95,7 +95,7 @@ export function LeaveForm({ onSubmit, onCancel }: LeaveFormProps) {
         <div className="space-y-2">
           <Label>Duration</Label>
           <div className="text-sm text-muted-foreground">
-            {days > 0 ? `${days} day${days > 1 ? 's' : ''}` : 'Select dates'}
+            {watch('type') === 'short_leave' ? '0.25 days (2 hours)' : (days > 0 ? `${days} day${days > 1 ? 's' : ''}` : 'Select dates')}
           </div>
         </div>
 
@@ -132,10 +132,22 @@ export function LeaveForm({ onSubmit, onCancel }: LeaveFormProps) {
           id="reason"
           {...register('reason')}
           placeholder="Please provide a reason for your leave request..."
-          rows={4}
+          rows={3}
         />
         {errors.reason && (
           <p className="text-sm text-red-600">{errors.reason.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="remarks">Remarks (Optional)</Label>
+        <Input
+          id="remarks"
+          {...register('remarks')}
+          placeholder="Additional remarks..."
+        />
+        {errors.remarks && (
+          <p className="text-sm text-red-600">{errors.remarks.message}</p>
         )}
       </div>
 

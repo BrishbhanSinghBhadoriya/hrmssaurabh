@@ -50,7 +50,7 @@ export const fetchEmployees = async (params: PaginationParams = {}): Promise<Pag
   if (params.status) queryParams.append('status', params.status);
   if (params.search) queryParams.append('search', params.search);
 
-  const response = await api.get(`/hr/getEmployeesbypagination?${queryParams.toString()}`, {
+  const response = await api.get(`/users/getEmployeesbypagination?${queryParams.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -77,6 +77,20 @@ export const deleteEmployee = async (userId: string): Promise<{ success: boolean
   });
   return response.data;
 };
+
+export const importEmployees = async (file: File): Promise<any> => {
+  const token = Cookies.get('token');
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/users/import-employees', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+};
+
 export const getEmployeeById = async (id: string): Promise<any | null> => {
   try {
     const response = await api.get(`/hr/getEmployee/${id}`);

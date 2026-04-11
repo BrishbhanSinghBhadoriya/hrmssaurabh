@@ -31,7 +31,7 @@ const departments = [
   { value: 'HR', label: 'Human Resources' },
   { value: 'Marketing', label: 'Marketing' },
   { value: 'Sales', label: 'Sales' },
-  { value: 'Finance', label: 'Finance' },
+ 
   { value: 'Operations', label: 'Operations' },
   { value: 'Other', label: 'Other' }
 ];

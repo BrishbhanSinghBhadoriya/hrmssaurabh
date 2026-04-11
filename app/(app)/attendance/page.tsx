@@ -146,10 +146,11 @@ export default function AttendancePage() {
           date: record.date,
           checkIn: record.checkIn?.includes('T') ? record.checkIn : toIsoIST(record.date, record.checkIn),
           checkOut: record.checkOut?.includes('T') ? record.checkOut : toIsoIST(record.date, record.checkOut),
-          hoursWorked: record.hoursWorked
+          hoursWorked: record.hoursWorked,
+          remarks: record.remarks
         };
 
-        const res = await api.put(`/hr/updateAttendance/${recordId}`, payload);
+        const res = await api.put(`/api/updateAttendance/${recordId}`, payload);
         return res.data;
       } else {
         const toIso = (date?: string, hhmm?: string) => {
@@ -166,10 +167,11 @@ export default function AttendancePage() {
           checkIn: record.checkIn?.includes('T') ? record.checkIn : toIso(record.date, record.checkIn),
           checkOut: record.checkOut?.includes('T') ? record.checkOut : toIso(record.date, record.checkOut),
           hoursWorked: record.hoursWorked,
-          status: (record.status || 'present').toString().toLowerCase()
+          status: (record.status || 'present').toString().toLowerCase(),
+          remarks: record.remarks
         };
 
-        const response = await api.post(`/hr/markAttendance/${record.employeeId}`, payload);
+        const response = await api.post(`/api/markAttendance/${record.employeeId}`, payload);
 
         return response.data;
       }
@@ -878,7 +880,8 @@ export default function AttendancePage() {
                 checkIn: editing.checkIn?.includes('T') ? editing.checkIn : toIso(editing.date, editing.checkIn),
                 checkOut: editing.checkOut?.includes('T') ? editing.checkOut : toIso(editing.date, editing.checkOut),
                 hoursWorked: calculatedHoursWorked,
-                status: validStatus
+                status: validStatus,
+                remarks: editing.remarks
               };
 
               console.log('Final payload before API call:', payload);
@@ -976,6 +979,15 @@ export default function AttendancePage() {
                   <SelectItem value="late">Half Day</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <label className="text-sm font-medium">Remarks</label>
+              <Input
+                type="text"
+                value={editing?.remarks || ''}
+                onChange={(e) => setEditing({ ...(editing || {}), remarks: e.target.value })}
+                placeholder="Enter remarks"
+              />
             </div>
           </div>
         </EditModal>

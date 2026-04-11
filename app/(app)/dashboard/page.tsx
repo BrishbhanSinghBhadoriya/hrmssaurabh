@@ -157,15 +157,16 @@ import { Calendar as MiniCalendar } from '@/components/ui/calendar';
           </div>
           <div className=''>Last login: {user?.lastLogin ? dayjs(user.lastLogin).format('DD MMM YYYY, hh:mm A') : '—'}</div>
           <div className="hidden sm:flex gap-2">
+             <Button variant="outline" onClick={() => router.push('/profile')}>
+              <Users className="mr-2 h-4 w-4" /> Profile
+            </Button>
             <Button variant="outline" onClick={() => router.push('/attendance')}>
               <Clock className="mr-2 h-4 w-4" /> Attendance
             </Button>
             <Button variant="outline" onClick={() => router.push('/leaves')}>
               <FileText className="mr-2 h-4 w-4" /> Leaves
             </Button>
-            <Button variant="outline" onClick={() => router.push('/profile')}>
-              <Users className="mr-2 h-4 w-4" /> Profile
-            </Button>
+            
           </div>
         </div>
        </div>
@@ -458,17 +459,89 @@ import { Calendar as MiniCalendar } from '@/components/ui/calendar';
               <Card>
                 <CardHeader>
                   <CardTitle>Leave Balance</CardTitle>
-                  <CardDescription>Casual, Sick, Earned</CardDescription>
+                  <CardDescription>Casual, Sick, Earned, etc.</CardDescription>
             </CardHeader>
             <CardContent>
                   <div className="space-y-3 text-sm">
-                    <div className="flex items-center justify-between"><span>Casual</span><span className="font-medium">—</span></div>
-                    <div className="flex items-center justify-between"><span>Sick</span><span className="font-medium">—</span></div>
-                    <div className="flex items-center justify-between"><span>Earned</span><span className="font-medium">—</span></div>
+                    <div className="flex items-center justify-between">
+                      <span>Total Approved</span>
+                      <span className="font-bold text-lg text-primary">{(empdashboardData?.leaves?.total ?? empdashboardData?.data?.leaves?.total ?? 0)} days</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      <div className="rounded-lg border p-2 bg-blue-50/50">
+                        <p className="text-xs text-muted-foreground">Casual</p>
+                        <p className="font-semibold">{(empdashboardData?.leaves?.counts?.casual ?? empdashboardData?.data?.leaves?.counts?.casual ?? 0)}</p>
+                      </div>
+                      <div className="rounded-lg border p-2 bg-orange-50/50">
+                        <p className="text-xs text-muted-foreground">Sick</p>
+                        <p className="font-semibold">{(empdashboardData?.leaves?.counts?.sick ?? empdashboardData?.data?.leaves?.counts?.sick ?? 0)}</p>
+                      </div>
+                      <div className="rounded-lg border p-2 bg-purple-50/50">
+                        <p className="text-xs text-muted-foreground">Earned</p>
+                        <p className="font-semibold">{(empdashboardData?.leaves?.counts?.earned ?? empdashboardData?.data?.leaves?.counts?.earned ?? 0)}</p>
+                      </div>
+                      <div className="rounded-lg border p-2 bg-yellow-50/50">
+                        <p className="text-xs text-muted-foreground">Short Leave</p>
+                        <p className="font-semibold">{(empdashboardData?.leaves?.counts?.short_leave ?? empdashboardData?.data?.leaves?.counts?.short_leave ?? 0)}</p>
+                      </div>
+                      <div className="rounded-lg border p-2 bg-red-50/50">
+                        <p className="text-xs text-muted-foreground">LOP</p>
+                        <p className="font-semibold">{(empdashboardData?.leaves?.counts?.lop ?? empdashboardData?.data?.leaves?.counts?.lop ?? 0)}</p>
+                      </div>
+                      <div className="rounded-lg border p-2 bg-pink-50/50">
+                        <p className="text-xs text-muted-foreground">FOP</p>
+                        <p className="font-semibold">{(empdashboardData?.leaves?.counts?.fop ?? empdashboardData?.data?.leaves?.counts?.fop ?? 0)}</p>
+                      </div>
+                    </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {(() => {
+          const history = empdashboardData?.leaves?.history ?? empdashboardData?.data?.leaves?.history;
+          if (!history || history.length === 0) return null;
+          return (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Recent Approved Leaves</CardTitle>
+                <CardDescription>Your recently approved leave history</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DataTable
+                  data={history}
+                  columns={[
+                    {
+                      key: 'leaveType',
+                      label: 'Type',
+                      render: (v) => <Badge variant="outline" className="capitalize">{String(v).replace('_', ' ')}</Badge>
+                    },
+                    {
+                      key: 'startDate',
+                      label: 'Start Date',
+                      render: (v) => dayjs(v).format('DD MMM YYYY')
+                    },
+                    {
+                      key: 'endDate',
+                      label: 'End Date',
+                      render: (v) => dayjs(v).format('DD MMM YYYY')
+                    },
+                    {
+                      key: 'totalDays',
+                      label: 'Days',
+                    },
+                    {
+                      key: 'status',
+                      label: 'Status',
+                      render: (v) => <Badge className="bg-green-500 text-white capitalize">{v}</Badge>
+                    }
+                  ]}
+                  initialPageSize={5}
+                />
+              </CardContent>
+            </Card>
+          );
+        })()}
 
             
           </>

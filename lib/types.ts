@@ -37,6 +37,7 @@ export interface Employee {
 
 export interface AttendanceRecord {
   id: string;
+  _id?: string;
   employeeId: string;
   employeeName: string;
   date: string;
@@ -45,6 +46,7 @@ export interface AttendanceRecord {
   hoursWorked?: number;
   status: 'present' | 'absent' | 'leave' | 'late' | 'holiday' | 'half-day';
   notes?: string;
+  remarks?: string;
 }
 
 export interface Holiday {
@@ -60,12 +62,13 @@ export interface LeaveRequest {
   _id: string;
   employeeId: string;
   employeeName: string;
-  leaveType: 'casual' | 'sick' | 'earned' | 'fop' | 'lop' ;
+  leaveType: 'casual' | 'sick' | 'earned' | 'fop' | 'lop' | 'short_leave';
   startDate: string;
   endDate: string;
   totalDays: number;
   days: number;
   reason: string;
+  remarks?: string;
   status: 'pending' | 'approved' | 'rejected';
   approverId?: string;
   approverName?: string;
@@ -196,6 +199,9 @@ export interface LeaveBalance {
   casual: { total: number; used: number; remaining: number };
   sick: { total: number; used: number; remaining: number };
   earned: { total: number; used: number; remaining: number };
+  short_leave: { total: number; used: number; remaining: number };
+  lop: { total: number; used: number; remaining: number };
+  fop: { total: number; used: number; remaining: number };
 }
 export interface getEmployeeName {
   _id: string;

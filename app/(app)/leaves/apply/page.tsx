@@ -25,9 +25,10 @@ export default function ApplyLeavePage() {
         reason: data.reason,
         startDate: data.startDate,
         endDate: data.endDate,
-        durationType: data.days && data.days > 1 ? 'multiple_days' : 'single_day',
+        remarks: data.remarks,
+        durationType: data.type === 'short_leave' ? 'short_leave' : (data.days && data.days > 1 ? 'multiple_days' : 'single_day'),
       };
-      await api.post('/leaves', payload);
+      await api.post('/api/createLeave', payload);
       toast.success('Leave request submitted successfully');
       router.push('/leaves');
     } catch (error) {

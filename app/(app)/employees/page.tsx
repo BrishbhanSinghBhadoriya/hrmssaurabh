@@ -35,14 +35,16 @@ import { EmployeeForm } from '@/components/forms/employee-form';
 import { TableSkeleton } from '@/components/ui/loading-skeleton';
 import { Employee } from '@/lib/types';
 import { mockDepartments } from '@/lib/mock';
-import { UserPlus, Eye, Edit, Trash2, Clock } from 'lucide-react';
+import { UserPlus, Eye, Edit, Trash2, Clock, Users } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { deleteEmployee, fetchEmployees, PaginationParams } from '@/components/functions/Employee';
+import { deleteEmployee, fetchEmployees, importEmployees, PaginationParams } from '@/components/functions/Employee';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
+import { useRef } from 'react';
+
 
 import { useFiltersStore } from '@/store/filters';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -52,6 +54,7 @@ import { useEffect } from 'react';
 export default function EmployeesPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { employeeFilters, setEmployeeFilters } = useFiltersStore();
 
 
@@ -76,6 +79,7 @@ export default function EmployeesPage() {
     mutationFn: async (employeeData: any) => {
       // Clean data to ensure no undefined values
       const payload = {
+        employeeId: employeeData.employeeId || "",
         username: employeeData.username || "",
         password: employeeData.password || "",
         name: employeeData.name || "",
@@ -87,7 +91,9 @@ export default function EmployeesPage() {
         designation: employeeData.designation || "",
         joiningDate: employeeData.joiningDate || "",
         dob: employeeData.dob || "",
-        isActive: true,
+        status: employeeData.status || "active",
+        gender: employeeData.gender || "",
+        isActive: employeeData.status === "active",
       };
 
       console.log('Sending payload to /users/register:', payload);
@@ -104,6 +110,18 @@ export default function EmployeesPage() {
       const message = error?.response?.data?.message || error?.message || 'Failed to add employee';
       toast.error(message);
     },
+  });
+
+  const importMutation = useMutation({
+    mutationFn: importEmployees,
+    onSuccess: (res) => {
+      toast.success('Employees imported successfully');
+      refetch();
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || 'Import failed';
+      toast.error(message);
+    }
   });
 
   const { data, isLoading, refetch } = useQuery({
@@ -143,6 +161,19 @@ export default function EmployeesPage() {
   const handleDeleteEmployee = async (employeeId: string) => {
     if (!employeeId) return;
     deleteEmployeeMutation.mutate(employeeId);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      importMutation.mutate(file);
+      // Reset input
+      e.target.value = '';
+    }
   };
 
   // Pagination handlers
@@ -286,12 +317,17 @@ export default function EmployeesPage() {
     </div>
   );
 
-  const actions = (employee: Employee) => (
+  const actions = (employee: Employee) => {
+    const empId = employee._id || (employee as any).id;
+    return (
     <div className="flex items-center gap-2">
       <Button
         size="sm"
         variant="ghost"
-        onClick={() => router.push(`/employees/${employee._id ?? employee}`)}
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/employees/${empId}`);
+        }}
       >
         <Eye className="h-4 w-4" />
       </Button>
@@ -301,11 +337,12 @@ export default function EmployeesPage() {
             size="sm"
             variant="ghost"
             className="text-red-600 hover:text-red-700"
+            onClick={(e) => e.stopPropagation()}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
         </AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -314,17 +351,15 @@ export default function EmployeesPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDeleteEmployee((employee as any)?._id)}>
+            <AlertDialogAction onClick={() => handleDeleteEmployee(empId)}>
               Yes, delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-
-
     </div>
   );
+};
 
 
   const paginationInfo = data?.pagination;
@@ -341,26 +376,39 @@ export default function EmployeesPage() {
             Manage your organization's workforce
           </p>
         </div>
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Employee
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add New Employee</DialogTitle>
-              <DialogDescription>
-                Fill in the employee details below.
-              </DialogDescription>
-            </DialogHeader>
-            <EmployeeForm
-              onSubmit={handleAddEmployee}
-              onCancel={() => setShowAddDialog(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".xlsx, .xls, .csv"
+            className="hidden"
+          />
+          <Button variant="outline" onClick={handleImportClick} disabled={importMutation.isPending}>
+            <Users className="mr-2 h-4 w-4" />
+            {importMutation.isPending ? 'Importing...' : 'Bulk Import'}
+          </Button>
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add Employee
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Add New Employee</DialogTitle>
+                <DialogDescription>
+                  Fill in the employee details below.
+                </DialogDescription>
+              </DialogHeader>
+              <EmployeeForm
+                onSubmit={handleAddEmployee}
+                onCancel={() => setShowAddDialog(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <DataTable
@@ -368,7 +416,10 @@ export default function EmployeesPage() {
         columns={columns}
         searchPlaceholder="Search by name or employee code..."
         defaultSearchValue={employeeFilters.search ?? ''}
-        onRowClick={(employee) => router.push(`/employees/${(employee as any)?._id}`)}
+        onRowClick={(employee) => {
+          const empId = employee._id || (employee as any).id;
+          if (empId) router.push(`/employees/${empId}`);
+        }}
         onSearch={handleSearch}
         actions={actions}
         filters={filters}
