@@ -16,8 +16,11 @@ const [modalOpen, setModalOpen] = useState<null | 'personal' | 'contact' | 'job'
 const openEdit = (key: 'personal' | 'contact' | 'job' | 'experience' | 'education' | 'bank' | 'skills' | 'address' | 'documents') => setModalOpen(key);
 const [isSavingModal, setIsSavingModal] = useState(false);
 const { user, updateUser } = useAuth();
+const currentUser = authService.getCurrentUser();
 const activeUser = (initialUser as any) ?? (user as any);
 const updateTargetId = targetUserId ?? (user as any)?.id;
+
+const isHRorAdmin = currentUser?.role === 'hr' || currentUser?.role === 'admin';
 
 // New: edit indices
 const [expEditIndex, setExpEditIndex] = useState<number | null>(null);
@@ -39,6 +42,7 @@ const personalInfoSchema = z.object({
     address: z.string().optional(),
     gender: z.string().optional(),
     country: z.string().optional(),
+    status: z.enum(['active', 'inactive', 'terminated']).optional(),
   });
 const contactInfoSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -123,6 +127,7 @@ const personalForm = useForm({
      address: typeof (activeUser as any)?.address === 'string' ? (activeUser as any).address : '',
      gender: activeUser?.gender || '',
      country: activeUser?.country || 'India',
+     status: (activeUser as any)?.status || 'active',
     },
   });
 
@@ -203,6 +208,7 @@ const savePersonal = async () => {
         address: personalForm.getValues('address') || undefined,
         gender: personalForm.getValues('gender') || undefined,
         country: personalForm.getValues('country') || undefined,
+        status: personalForm.getValues('status') || undefined,
       };
       const res = await authService.updateEmployeeProfile(updateTargetId!, payload);
       if (res.success) {
@@ -214,7 +220,8 @@ const savePersonal = async () => {
           bloodGroup: returned?.bloodGroup ?? payload.bloodGroup,
           address: returned?.address ?? payload.address,
           gender: returned?.gender ?? payload.gender,
-        });
+          status: (returned as any)?.status ?? payload.status,
+        } as any);
         toast.success('Personal information saved');
         closeEdit();
       } else {
@@ -536,7 +543,27 @@ return (
             <Input id="modal_dob" {...personalForm.register('bloodGroup')} />
           </div>
 
-          
+          {isHRorAdmin && (
+            <div className="space-y-2">
+              <Label htmlFor="modal_status">Employee Status</Label>
+              <Controller
+                control={personalForm.control}
+                name="status"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="modal_status">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="terminated">Terminated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          )}
         </form>
       </EditModal>
 

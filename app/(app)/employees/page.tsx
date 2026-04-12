@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
@@ -32,23 +32,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { EmployeeForm } from '@/components/forms/employee-form';
-import { TableSkeleton } from '@/components/ui/loading-skeleton';
 import { Employee } from '@/lib/types';
 import { mockDepartments } from '@/lib/mock';
-import { UserPlus, Eye, Edit, Trash2, Clock, Users } from 'lucide-react';
+import { UserPlus, Eye, Trash2, Clock, Users, Download } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { useQuery } from '@tanstack/react-query';
-import { deleteEmployee, fetchEmployees, importEmployees, PaginationParams } from '@/components/functions/Employee';
-import { useMutation } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { deleteEmployee, fetchEmployees, importEmployees, PaginationParams, fetchAllEmployees } from '@/components/functions/Employee';
 import dayjs from 'dayjs';
-import { useRef } from 'react';
-
+import * as XLSX from 'xlsx';
+// @ts-ignore - file-saver doesn't have types
+import { saveAs } from 'file-saver';
 
 import { useFiltersStore } from '@/store/filters';
 import { useDebounce } from '@/hooks/use-debounce';
-import { useEffect } from 'react';
 
 
 export default function EmployeesPage() {
@@ -75,9 +72,9 @@ export default function EmployeesPage() {
       page: 1
     }));
   }, [debouncedSearch]);
+
   const addEmployeeMutation = useMutation({
     mutationFn: async (employeeData: any) => {
-      // Clean data to ensure no undefined values
       const payload = {
         employeeId: employeeData.employeeId || "",
         username: employeeData.username || "",
@@ -96,7 +93,6 @@ export default function EmployeesPage() {
         isActive: employeeData.status === "active",
       };
 
-      console.log('Sending payload to /users/register:', payload);
       const response = await api.post('/users/register', payload);
       return response.data;
     },
@@ -106,7 +102,6 @@ export default function EmployeesPage() {
       refetch();
     },
     onError: (error: any) => {
-      console.error('💥 Error adding employee:', error);
       const message = error?.response?.data?.message || error?.message || 'Failed to add employee';
       toast.error(message);
     },
@@ -144,18 +139,8 @@ export default function EmployeesPage() {
     },
   });
 
-
-  console.log('Employees data:', data);
-  console.log('Pagination params:', paginationParams);
-
-
-
   const handleAddEmployee = async (data: any) => {
-    try {
-      addEmployeeMutation.mutate(data);
-    } catch (error) {
-      toast.error('Failed to add employee');
-    }
+    addEmployeeMutation.mutate(data);
   };
 
   const handleDeleteEmployee = async (employeeId: string) => {
@@ -171,12 +156,63 @@ export default function EmployeesPage() {
     const file = e.target.files?.[0];
     if (file) {
       importMutation.mutate(file);
-      // Reset input
       e.target.value = '';
     }
   };
 
-  // Pagination handlers
+  const handleExport = async () => {
+    try {
+      toast.loading('Preparing export...');
+      // Pass the current filters to fetchAllEmployees to export filtered data
+      const allData = await fetchAllEmployees({ 
+        limit: 5000,
+        status: paginationParams.status,
+        department: paginationParams.department,
+        search: paginationParams.search
+      });
+      
+      if (!allData || allData.length === 0) {
+        toast.dismiss();
+        toast.error('No employee data to export');
+        return;
+      }
+
+      const excelData = allData.map((emp: any) => ({
+        'Employee ID': emp.employeeId || emp.empCode || '',
+        'Name': emp.name || '',
+        'Username': emp.username || '',
+        'Email': emp.email || '',
+        'Phone': emp.phone || '',
+        'Department': emp.department || '',
+        'Designation': emp.designation || '',
+        'Role': emp.role || '',
+        'Joining Date': emp.joiningDate ? dayjs(emp.joiningDate).format('DD-MM-YYYY') : '',
+        'DOB': emp.dob ? dayjs(emp.dob).format('DD-MM-YYYY') : '',
+        'Status': emp.status || (emp.isActive ? 'active' : 'inactive'),
+        'Gender': emp.gender || '',
+        'Emergency Contact': emp.emergencyContactNo || ''
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees');
+
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      // Filename includes status if filtered
+      const statusSuffix = paginationParams.status ? `_${paginationParams.status}` : '';
+      saveAs(blob, `employees_export${statusSuffix}_${dayjs().format('DD_MM_YYYY')}.xlsx`);
+      
+      toast.dismiss();
+      toast.success('Employees data exported successfully');
+    } catch (error) {
+      toast.dismiss();
+      console.error('Export error:', error);
+      toast.error('Failed to export employees data');
+    }
+  };
+
   const handlePageChange = (page: number) => {
     setPaginationParams(prev => ({ ...prev, page }));
   };
@@ -184,8 +220,6 @@ export default function EmployeesPage() {
   const handleLimitChange = (limit: number) => {
     setPaginationParams(prev => ({ ...prev, limit, page: 1 }));
   };
-
-
 
   const handleDepartmentFilter = (department: string) => {
     setPaginationParams(prev => ({
@@ -227,7 +261,6 @@ export default function EmployeesPage() {
         return <span>{display || '—'}</span>;
       }
     },
-
     {
       key: 'name' as keyof Employee,
       label: 'Employee',
@@ -256,21 +289,13 @@ export default function EmployeesPage() {
       label: 'Designation',
       sortable: true,
     },
-
-
-
     {
       key: 'joiningDate' as keyof Employee,
       label: 'Joined',
       sortable: true,
       render: (value: string, record: Employee) => {
-        // Ensure joiningDate exists
         if (!record?.joiningDate) return "-";
-
-        // Parse joiningDate
         const joiningDate = dayjs(record.joiningDate);
-
-        // Optional: parse value if needed
         return (
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -320,47 +345,46 @@ export default function EmployeesPage() {
   const actions = (employee: Employee) => {
     const empId = employee._id || (employee as any).id;
     return (
-    <div className="flex items-center gap-2">
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={(e) => {
-          e.stopPropagation();
-          router.push(`/employees/${empId}`);
-        }}
-      >
-        <Eye className="h-4 w-4" />
-      </Button>
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-red-600 hover:text-red-700"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this employee? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDeleteEmployee(empId)}>
-              Yes, delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-};
-
+      <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/employees/${empId}`);
+          }}
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-red-600 hover:text-red-700"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this employee? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => handleDeleteEmployee(empId)}>
+                Yes, delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  };
 
   const paginationInfo = data?.pagination;
   const currentPage = paginationInfo?.currentPage ?? paginationParams.page ?? 1;
@@ -384,6 +408,10 @@ export default function EmployeesPage() {
             accept=".xlsx, .xls, .csv"
             className="hidden"
           />
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export Data
+          </Button>
           <Button variant="outline" onClick={handleImportClick} disabled={importMutation.isPending}>
             <Users className="mr-2 h-4 w-4" />
             {importMutation.isPending ? 'Importing...' : 'Bulk Import'}
@@ -436,8 +464,6 @@ export default function EmployeesPage() {
         }}
         isLoading={isLoading}
       />
-
-
     </div>
   );
 }

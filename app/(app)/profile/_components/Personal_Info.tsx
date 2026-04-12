@@ -12,6 +12,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn'
 import PublicIcon from '@mui/icons-material/Public'
 import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import ManIcon from '@mui/icons-material/Man';
+import InfoIcon from '@mui/icons-material/Info';
 import dayjs from "dayjs";
 
 
@@ -122,6 +123,12 @@ console.log(user)
                 (user as any)?.address?.country || 'India',
               ].filter(Boolean).join(' - ')}
               color="#e0e7ff"
+            />
+            <Tile
+              icon={<InfoIcon sx={{ fontSize: 18, color: (user as any)?.status === 'active' ? '#16a34a' : (user as any)?.status === 'terminated' ? '#dc2626' : '#9333ea' }} />}
+              label="Employee Status"
+              value={get((user as any)?.status, 'active').toUpperCase()}
+              color={(user as any)?.status === 'active' ? '#dcfce7' : (user as any)?.status === 'terminated' ? '#fee2e2' : '#f3e8ff'}
             />
           </div>
         </CardContent>

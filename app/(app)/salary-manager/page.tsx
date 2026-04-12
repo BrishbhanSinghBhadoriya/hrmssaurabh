@@ -54,9 +54,7 @@ const API_URL = `${NEXT_PUBLIC_API_URL}/`;
          {/* Left Side: Salary Manager */}
          <div className="lg:col-span-8">
            <Card className="rounded-2xl h-full">
-             <CardHeader>
-               <CardTitle>Salary Manager</CardTitle>
-             </CardHeader>
+            
              <CardContent>
                {allowed ? (
                  <SalarySlipManager />

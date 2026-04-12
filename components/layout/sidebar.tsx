@@ -29,9 +29,9 @@ const navigation = [
   { name: 'Attendance', href: '/attendance', icon: Calendar, roles: ['employee', 'manager', 'hr', 'admin'] },
   { name: 'Holidays', href: '/holidays', icon: CalendarDays, roles: ['employee', 'manager', 'hr', 'admin'] },
   { name: 'Leaves', href: '/leaves', icon: FileText, roles: ['employee', 'manager', 'hr', 'admin'] },
-  { name: 'Salary Slip', href: '/salary-slip', icon: FileText, roles: ['employee'] },
 
-  { name: 'Salary Manager', href: '/salary-manager', icon: FileText, roles: ['manager', 'hr', 'admin'] },
+
+
   {name:'Announcements', href: '/announcements', icon: Bell, roles: ['manager', 'hr', 'admin', 'employee'] },
   {name:"Reset Employee Password",href:'/reset-emp-password',icon: Key , roles:['hr']}
 
