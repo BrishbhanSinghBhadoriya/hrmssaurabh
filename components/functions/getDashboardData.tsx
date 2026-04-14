@@ -16,7 +16,7 @@ export default getDashboardData;
 
 export const getEmployeesDashboardata=async ()=>{
     const token =Cookies.get('token');
-    const response=await api.get('/api/users/getDashboard',{
+    const response=await api.get('/users/getDashboard',{
         headers:{
             Authorization:`Bearer ${token}`
         }

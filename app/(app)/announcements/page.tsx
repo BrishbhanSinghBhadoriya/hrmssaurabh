@@ -311,13 +311,7 @@ export default function AnnouncementPage() {
       </Button>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+         
         
         </AlertDialogTrigger>
         <AlertDialogContent>
@@ -541,14 +535,7 @@ export default function AnnouncementPage() {
                           <span className="flex items-center gap-2 truncate">
                             <FileText className="h-4 w-4" /> {file.name}
                           </span>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeDoc(index)}
-                          >
-                            Remove
-                          </Button>
+                          
                         </li>
                       ))}
                     </ul>
