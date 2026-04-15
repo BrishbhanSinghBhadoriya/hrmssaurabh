@@ -85,7 +85,12 @@ export function Topbar({ onToggleSidebar, title, breadcrumbs, actions }: TopbarP
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-10 w-10 border border-border/50 shadow-sm overflow-hidden">
+                  {user?.loginImage ? (
+                    <AvatarImage src={user.loginImage} alt="Login Verification Photo" className="object-cover" />
+                  ) : (
+                    <AvatarImage src={user?.profilePicture || ''} alt={user?.name} className="object-cover" />
+                  )}
                   <AvatarFallback>
                     {user?.name?.split(' ').map((n: string) => n[0]).join('')}
                   </AvatarFallback>

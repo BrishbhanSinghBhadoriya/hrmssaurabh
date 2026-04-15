@@ -9,7 +9,7 @@ import { AxiosError } from 'axios';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string, image?: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
   updateUser: (partial: Partial<User>) => void;
@@ -29,10 +29,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    console.log('AuthContext: login called with:', { username, password });
+  const login = async (username: string, password: string, image?: string): Promise<boolean> => {
+    console.log('AuthContext: login called with:', { username, password, hasImage: !!image });
     const deviceWidth = window.innerWidth || document.documentElement.clientWidth;
-    const result = await authService.login(username, password);
+    const result = await authService.login(username, password, image);
     console.log('AuthContext: authService result:', result);
     
     if (result.success && result.user) {

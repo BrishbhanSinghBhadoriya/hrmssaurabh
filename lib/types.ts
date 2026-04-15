@@ -109,7 +109,9 @@ export interface User {
   };
   dob?: string;
   gender?: "male" | "female" | "other";
+  // Profile & Visuals
   profilePicture?: string;
+  loginImage?: string;
   avatarUrl?: string;
   professionalEmailId?: string;
   emergencyContactNo: string;

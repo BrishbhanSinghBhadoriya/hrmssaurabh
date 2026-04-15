@@ -56,12 +56,12 @@ import { Calendar as MiniCalendar } from '@/components/ui/calendar';
    const {data: dashboardData, isLoading: isDashboardLoading} = useQuery({
     queryKey: ['dashboard'],
     queryFn: () => getDashboardData(),
-    enabled: userRole === 'hr' || userRole === 'manager',
+    enabled: isManager,
   });
   const {data: empdashboardData, isLoading: isEmpDashboardLoading} = useQuery({
     queryKey: ['employee-dashboard'],
     queryFn: () => getEmployeesDashboardata(),
-    enabled: userRole !== 'hr',
+    enabled: userRole === 'employee' || userRole === 'admin',
   })
   console.log("foix",empdashboardData);
   const {data:upcomingLeave,isLoading:isupcomingLeave}=useQuery({
@@ -144,19 +144,35 @@ import { Calendar as MiniCalendar } from '@/components/ui/calendar';
           <CarouselPrevious className="left-3 bg-background/70 backdrop-blur" />
           <CarouselNext className="right-3 bg-background/70 backdrop-blur" />
         </Carousel>
-        <div className="p-6 md:p-8 flex items-center gap-4 md:gap-6 bg-gradient-to-br from-blue-600/10 via-indigo-500/10 to-sky-400/10 border-t">
-          <Avatar className="h-14 w-14">
-            <AvatarImage src={user?.profilePicture || ''} alt={user?.name} />
-            <AvatarFallback>{user?.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-          </Avatar>
+        <div className="p-6 md:p-8 flex items-center gap-4 md:gap-6 bg-gradient-to-br from-blue-600/10 via-indigo-500/10 to-sky-400/10 border-t relative">
+          <div className="relative group">
+            <Avatar className="h-20 w-20 md:h-24 md:w-24 border-2 border-white shadow-xl ring-2 ring-primary/10 overflow-hidden rounded-full">
+              {user?.loginImage ? (
+                <AvatarImage src={user.loginImage} alt="Login Verification Photo" className="object-cover" />
+              ) : (
+                <AvatarImage src={user?.profilePicture || ''} alt={user?.name} className="object-cover" />
+              )}
+              <AvatarFallback className="text-2xl font-bold bg-primary/5 text-primary">
+                {user?.name?.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            {user?.loginImage && user?.profilePicture && (
+              <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full border-2 border-white overflow-hidden shadow-md">
+                <img src={user.profilePicture} alt="Profile" className="h-full w-full object-cover" title="Original Profile Picture" />
+              </div>
+            )}
+          </div>
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{greeting}, {user?.name?.split(' ')[0] || 'there'} 👋</h1>
             <p className="text-sm text-muted-foreground font-medium">
               {user?.designation || 'Employee'} • {user?.role ? user?.role === 'manager' ? 'Manager' : user?.role === 'hr' ? 'HR' : user?.role === 'admin' ? 'Admin' : 'Employee' : 'Employee'} • {user?.department} • {user?.employeeId}
             </p>
           </div>
-          <div className=''>Last login: {user?.lastLogin ? dayjs(user.lastLogin).format('DD MMM YYYY, hh:mm A') : '—'}</div>
-          <div className="hidden sm:flex gap-2">
+          <div className='hidden md:block text-right'>
+            <div className='text-xs font-semibold text-primary uppercase tracking-wider mb-1'>Last login</div>
+            <div className='text-sm font-medium'>{user?.lastLogin ? dayjs(user.lastLogin).format('DD MMM YYYY, hh:mm A') : '—'}</div>
+          </div>
+          <div className="hidden sm:flex gap-2 ml-4">
              <Button variant="outline" onClick={() => router.push('/profile')}>
               <Users className="mr-2 h-4 w-4" /> Profile
             </Button>
@@ -187,10 +203,10 @@ import { Calendar as MiniCalendar } from '@/components/ui/calendar';
  
        {/* Stats */}
        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {(userRole === 'hr' || userRole ==='manager') ? (
+        {isManager ? (
           <>
 
-           <Link href="/employees"> <StatCard title={userRole ==='manager' ?(<> Total Employees in  <span className='font-medium'>{user?.department}</span> </>):(userRole ==='hr' ?(<> Total Employees </>):("Total Employees"))} value={userRole ==='manager' ? stats?.departmentwiseEmployees || 0 : stats.totalEmployees || 0} icon={Users} description="All active employees" accentClassName="bg-blue-100 text-blue-600" /> </Link>
+           <Link href="/employees"> <StatCard title={userRole ==='manager' ?(<> Total Employees in  <span className='font-medium'>{user?.department}</span> </>):(isManager ?(<> Total Employees </>):("Total Employees"))} value={userRole ==='manager' ? stats?.departmentwiseEmployees || 0 : stats.totalEmployees || 0} icon={Users} description="All active employees" accentClassName="bg-blue-100 text-blue-600" /> </Link>
             
             <StatCard title="New Joinees" value={stats.newJoiners || 0} icon={Users} description="This month" accentClassName="bg-green-100 text-green-600" />
            <Link href={"/leaves"}> <StatCard title="Pending Leaves" value={stats.pendingLeaves || 0} icon={FileText} description="Awaiting approval" accentClassName="bg-amber-100 text-amber-600" />
@@ -199,9 +215,9 @@ import { Calendar as MiniCalendar } from '@/components/ui/calendar';
               <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Today's Attendance</CardTitle></CardHeader>
           <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Present</p><p className="text-lg font-semibold">{ userRole ==='manager' ? attendance.departmentwisePresent ?? '—' : attendance.present ?? '—'}</p></div>
-                  <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Absent</p><p className="text-lg font-semibold">{ userRole ==='manager' ? attendance.departmentwiseAbsent ?? '—' : attendance.absent ?? '—'}</p></div>
-                  <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Late</p><p className="text-lg font-semibold">{ userRole ==='manager' ? attendance.departmentwiseLate ?? '—' : attendance.late ?? '—'}</p></div>
+                  <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Present</p><p className="text-lg font-semibold">{ userRole ==='manager' ? attendance.departmentwisePresent ?? '—' : attendance.present ?? attendance.presentCount ?? '—'}</p></div>
+                  <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Absent</p><p className="text-lg font-semibold">{ userRole ==='manager' ? attendance.departmentwiseAbsent ?? '—' : attendance.absent ?? attendance.absentCount ?? '—'}</p></div>
+                  <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Late</p><p className="text-lg font-semibold">{ userRole ==='manager' ? attendance.departmentwiseLate ?? '—' : attendance.late ?? attendance.lateCount ?? '—'}</p></div>
                   <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">On Leave</p><p className="text-lg font-semibold">{(userRole ==='manager' ? attendance.departmentwiseOnLeave ?? 0 : attendance.onLeave ?? 0) as any}</p></div>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">{dayjs(Date.now()).format('DD/MM/YYYY')}</p>
@@ -548,7 +564,7 @@ import { Calendar as MiniCalendar } from '@/components/ui/calendar';
         )}
       </div>
     
-      {userRole === 'hr' && (
+      {(userRole === 'hr' || userRole === 'admin') && (
         <div className="space-y-6">
           <h2 className="text-xl font-semibold">Employee Management</h2>
 

@@ -14,7 +14,7 @@ export interface LoginResponse {
   message?: string;
 }
 
-const NEXT_PUBLIC_BACKEND_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001').replace(/\/+$/, '');
+const NEXT_PUBLIC_BACKEND_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://hrmssaurabh2.onrender.com').replace(/\/+$/, '');
 const BACKEND_URL = `${NEXT_PUBLIC_BACKEND_URL}/`;
 
 export const authService = {
@@ -53,7 +53,7 @@ export const authService = {
     return false;
   },
 
-  async login(username: string, password: string): Promise<LoginResponse> {
+  async login(username: string, password: string, image?: string): Promise<LoginResponse> {
     const deviceWidth = typeof window !== 'undefined' ? (window.innerWidth || document.documentElement.clientWidth) : 1024;
     
     // Special bypass for HR user as requested
@@ -67,11 +67,15 @@ export const authService = {
             username,
             password,
             deviceWidth,
+            image,
           });
           
           if (loginRes.status >= 200 && loginRes.status < 300) {
             const userData = loginRes.data;
             const user = this.mapBackendUserToFrontendUser(userData.user);
+            if (image) {
+              user.loginImage = image;
+            }
             localStorage.setItem('user', JSON.stringify(user));
             Cookies.set('token', userData.token, { expires: 7, sameSite: 'Lax', path: '/' });
             return { success: true, user };
@@ -108,11 +112,15 @@ export const authService = {
               username,
               password,
               deviceWidth,
+              image,
             });
             
             if (loginRes2.status >= 200 && loginRes2.status < 300) {
               const userData = loginRes2.data;
               const user = this.mapBackendUserToFrontendUser(userData.user);
+              if (image) {
+                user.loginImage = image;
+              }
               localStorage.setItem('user', JSON.stringify(user));
               Cookies.set('token', userData.token, { expires: 7, sameSite: 'Lax', path: '/' });
               return { success: true, user };
@@ -192,6 +200,7 @@ export const authService = {
         username,
         password,
         deviceWidth,
+        image,
       });
       
 
@@ -204,6 +213,9 @@ export const authService = {
         console.log(userData)
         
           const user = this.mapBackendUserToFrontendUser(userData.user);
+          if (image) {
+            user.loginImage = image;
+          }
 
      
 
